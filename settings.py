@@ -9,6 +9,7 @@ class Settings:
     APP_NAME: str = "Neptune API"
     API_PREFIX: str = "/api"
     GROQ_API_KEY: str = os.getenv("GROQ_API_KEY", "")
+    SERPAPI_KEY: str = os.getenv("SERPAPI_KEY", "")
 
 
 
