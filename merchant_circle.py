@@ -32,6 +32,7 @@ async def search_local_artisans(query: str, location: str, client: AsyncClient):
     tasks = [artisan_details(artisan, client) for artisan in data]
     await asyncio.gather(*tasks)
     print(data, f"Total: {len(data)}")
+    return data
 
       # For debugging, you might want to parse this HTML instead
 
