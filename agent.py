@@ -105,7 +105,7 @@ async def search_and_format_artisans(query: str, retry: int = 0) -> dict:
             data = generate_dummy_businesses(artisan, location, number)
             return {
                 "message": message,
-                "data": data
+                "results": data
             }
     except Exception as e:
         print(f"Error during search_classifier [{retry+1}]: {e}")
@@ -115,7 +115,7 @@ async def search_and_format_artisans(query: str, retry: int = 0) -> dict:
         else:
             return {
                 "message": "Unable to retrieve artisan data after multiple attempts.",
-                "data": []
+                "results": []
             }
 
     
