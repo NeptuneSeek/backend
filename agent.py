@@ -93,7 +93,7 @@ async def search_classifier(query: str) -> tuple:
         result = response.json().get("choices")[0].get("message").get("content")
         artisan, location, message, number = tuple(result.strip().split("<->"))
         number = int(number.strip())
-        print(artisan.strip(), location.strip(), message.strip(), number)
+        # print(artisan.strip(), location.strip(), message.strip(), number)
         return artisan.strip(), location.strip(), message.strip(), number
 
 
