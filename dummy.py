@@ -27,7 +27,7 @@ def generate_dummy_business(profession: str, location: str):
     }
 
 def generate_dummy_businesses(profession: str, location: str, count: int = 10):
-    return sorted([generate_dummy_business(profession, location) for _ in range(count)], key=lambda x: x.get("neptune_score", None), reverse=True)
+    return sorted([generate_dummy_business(profession, location) for _ in range(count+1)], key=lambda x: x.get("neptune_score", None), reverse=True)
 
 # Example usage
 # dummy = generate_dummy_businesses('plumber', 'Los Angeles, CA', 10)
