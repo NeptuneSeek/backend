@@ -1,13 +1,14 @@
 from fastapi import APIRouter
 from fastapi.responses import JSONResponse
 from fastapi import status
+from model import SearchModel
 
 
 api = APIRouter()
 
 
 
-@api.get("/health")
+@api.get("/health", tags=["Health Check"])
 async def health_check():
     """
     Health check endpoint to verify the API is running.
@@ -26,14 +27,10 @@ async def health_check():
         })
 
 
-@api.get("/search")
-async def search():
-    """
-    Search endpoint to handle search queries.
-    This is a placeholder for the actual search logic.
-    Returns a JSON response with a message indicating the search was successful.
-    """
+@api.post("/search", tags=["Search"])
+async def search(data: SearchModel):
+    from agent import search_and_format_artisans
     return JSONResponse(
-        content={"message": "Search query received"},
+        content=await search_and_format_artisans(data.search),
         status_code=status.HTTP_200_OK
     )

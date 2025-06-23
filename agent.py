@@ -62,34 +62,63 @@ def build_parse_results_payload(query: str, scraped_data: list[Dict[str, str]]) 
 async def search_classifier(query: str) -> tuple:
     async with AsyncClient() as client:
         payload = {
-        "model": "llama3-70b-8192",
-        "messages": [
-            {
-                "role": "system",
-                "content": (
-                    "You are a classifier that extracts the profession or service type and the location "
-                    "from a user's query. Your response should be a string in the format"
-                    "profession_or_artisan<->location. Do not include any extra text, just the string."
-                )
-            },
-            {
-                "role": "user",
-                "content": f"{query}"
-            }
-        ]}
+            "model": "llama3-70b-8192",
+            "messages": [
+                {
+                    "role": "system",
+                    "content": (
+                        "You are a classifier that extracts the profession, service type, or artisan from a user's query and pairs it with the corresponding location.\n"
+                        "If the user does not specify a city and state, assume a reasonable or commonly associated location based on the profession or general U.S. context.\n"
+                        "\n"
+                        "You must also generate:\n"
+                        "- A short, friendly reply message for the user.\n"
+                        "- A number (an integer, either randomly between 3–10 or inferred from the prompt).\n"
+                        "\n"
+                        "Return your response as a **single string** in exactly the following format:\n"
+                        "profession_or_artisan<->City, State<->reply_text<->number\n"
+                        "\n"
+                        "Do not include any extra text, line breaks, explanations, or punctuation outside this format."
+                    )
+                },
+                {
+                    "role": "user",
+                    "content": f"{query}"
+                }
+            ],
+            "temperature": 0.7
+        }
+
         response = await client.post(ENDPOINT, headers=headers, json=payload)
         response.raise_for_status()
         result = response.json().get("choices")[0].get("message").get("content")
-        result = tuple(result.strip().split("<->"))
-        print(result)
-        return result
+        artisan, location, message, number = tuple(result.strip().split("<->"))
+        number = int(number.strip())
+        # print(artisan.strip(), location.strip(), message.strip(), number)
+        return artisan.strip(), location.strip(), message.strip(), number
 
-async def search_and_format_artisans(query: str) -> List[Dict]:
-    async with AsyncClient() as client:
-        response = await client.post(ENDPOINT, headers=headers, json=build_parse_results_payload(query))
-        result = response.json().get("choices")[0].get("message").get("content")
-        return ast.literal_eval(result)
+
+async def search_and_format_artisans(query: str, retry: int = 0) -> dict:
+    from dummy import generate_dummy_businesses
+    try:
+        async with AsyncClient() as client:
+            artisan, location, message, number,  = await search_classifier(query)
+            data = generate_dummy_businesses(artisan, location, number)
+            return {
+                "message": message,
+                "results": data
+            }
+    except Exception as e:
+        print(f"Error during search_classifier [{retry+1}]: {e}")
+        if retry < 3:
+            retry += 1
+            return await search_and_format_artisans(query, retry)
+        else:
+            return {
+                "message": "Unable to retrieve artisan data after multiple attempts.",
+                "results": []
+            }
+
     
 
 
-asyncio.run(search_classifier("plumber in Los Angeles"))
+# asyncio.run(search_classifier("Been disapointed lately with the quality of work from local plumbers in Los Angeles, CA. Can you help me find a good one?"))
