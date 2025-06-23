@@ -14,7 +14,7 @@ def generate_dummy_business(profession: str, location: str):
     reviews = random.randint(10, 500)
     description = f"We are a {random.choice(['locally owned', 'family-run', 'certified', 'highly rated'])} {profession} business serving the {location.split(',')[0]} area with excellence and professionalism."
     map_url = f"https://www.google.com/maps/search/?api=1&query={quote_plus(address)}"
-    neptune_score = round((rating * 20) - (random.randint(50, 200) / 10), 0)
+    neptune_score = min(100, round((rating * 15) + (min(reviews, 100) * 0.35), 0))
 
     return {
         "name": business_name,
