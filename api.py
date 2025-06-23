@@ -29,6 +29,10 @@ async def health_check():
 
 @api.post("/search", tags=["Search"])
 async def search(data: SearchModel):
+    """
+    Handles search requests by forwarding the search query to the agent module
+    and returning formatted artisan data in a JSON response.
+    """
     from agent import search_and_format_artisans
     return JSONResponse(
         content=await search_and_format_artisans(data.search),
