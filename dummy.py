@@ -15,15 +15,21 @@ def generate_dummy_business(profession: str, location: str):
     booking_method = random.choice(['online with Apple Pay', 'online via web form', 'by phone only', 'via text or email'])
     
     # Core components
-    review_score = round(rating * 15)
-    review_volume_score = round(min(reviews, 100) * 0.35)
-    booking_score = random.choice([30, 25, 15])  # Example values
+    review_score = round((rating / 5.0) * 30)                        # Rating out of 5 → max 30
+    review_volume_score = round((min(reviews, 100) / 100) * 30)      # 100 reviews = 30 points
 
-    # Final Neptune score
-    neptune_score = min(100, review_score + review_volume_score)
+    # Assign booking score based on method
+    booking_methods = {
+        'online with Apple Pay': 40,
+        'online via web form': 30,
+        'via text or email': 20,
+        'by phone only': 10
+    }
+    booking_method = random.choice(list(booking_methods.keys()))
+    booking_score = booking_methods[booking_method]
 
-    # Adjust for booking method
-    final_score = min(100, neptune_score + booking_score - 15)  # normalize around 100 max
+    # Final score
+    final_score = review_score + review_volume_score + booking_score # normalize around 100 max
 
     # Description logic
     score_description = (
