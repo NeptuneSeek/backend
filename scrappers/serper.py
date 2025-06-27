@@ -34,5 +34,5 @@ async def search_local_artisans(query: str, num: int = 20):
 
     return results
 
-res = asyncio.run(search_local_artisans("plumber in LA"))
-print(res)
+# res = asyncio.run(search_local_artisans("plumber in LA"))
+# print(res)
