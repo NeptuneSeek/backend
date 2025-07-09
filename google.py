@@ -36,7 +36,6 @@ async def geocode_location(location: str):
 async def search_local_artisans(query: str, location: str = "", radius: int = 10000):
     url = f"{BASE_URL}/places:searchText"
     lat, lng = await geocode_location(location)
-    print(lat, lng)
     if lat is None or lng is None:
         raise ValueError("Could not geocode the provided location.")
     
@@ -51,7 +50,7 @@ async def search_local_artisans(query: str, location: str = "", radius: int = 10
                 "radius": radius
             }
         },
-        "maxResultCount": 15
+        "maxResultCount": 20
     }
 
     async with AsyncClient() as client:
@@ -85,3 +84,4 @@ if __name__ == "__main__":
     )
     for res in results:
         print(res)
+    print(len(results), "results found.")
