@@ -4,6 +4,7 @@ from settings import settings
 
 
 BASE_URL = "https://places.googleapis.com/v1"
+GEOCODE_URL = "https://maps.googleapis.com/maps/api/geocode/json"
 
 HEADERS = {
     "Content-Type": "application/json",
@@ -14,12 +15,31 @@ HEADERS = {
         "places.rating,"
         "places.priceLevel,"
         "places.nationalPhoneNumber,"
+        "places.businessStatus,"
+        "places.userRatingCount,"
+        "places.regularOpeningHours,"
         "places.websiteUri"
     )
 }
 
-async def search_local_artisans(query: str, location: str = "", lat: float = 34.0522, lng: float = -118.2437, radius: int = 10000):
+async def geocode_location(location: str):
+    params = {"address": location, "key": settings.GOOGLE_API_KEY}
+    async with AsyncClient() as client:
+        response = await client.get(GEOCODE_URL, params=params)
+        response.raise_for_status()
+        data = response.json()
+        if data["results"]:
+            loc = data["results"][0]["geometry"]["location"]
+            return loc["lat"], loc["lng"]
+        return None, None
+
+async def search_local_artisans(query: str, location: str = "", radius: int = 10000):
     url = f"{BASE_URL}/places:searchText"
+    lat, lng = await geocode_location(location)
+    print(lat, lng)
+    if lat is None or lng is None:
+        raise ValueError("Could not geocode the provided location.")
+    
     payload = {
         "textQuery": f"{query} in {location}",
         "locationBias": {
@@ -31,7 +51,7 @@ async def search_local_artisans(query: str, location: str = "", lat: float = 34.
                 "radius": radius
             }
         },
-        "maxResultCount": 10
+        "maxResultCount": 15
     }
 
     async with AsyncClient() as client:
@@ -47,6 +67,9 @@ async def search_local_artisans(query: str, location: str = "", lat: float = 34.
             "rating": place.get("rating"),
             "price_level": place.get("priceLevel"),
             "phone": place.get("nationalPhoneNumber"),
+            "business_status": place.get("businessStatus"),
+            "opening_hours": place.get("regularOpeningHours", {}).get("periods", []),
+            "rating_count": place.get("userRatingCount"),
             "website": place.get("websiteUri"),
         })
 
@@ -58,7 +81,7 @@ import asyncio
 
 if __name__ == "__main__":
     results = asyncio.run(
-        search_local_artisans("plumber", "Los Angeles, CA", lat=34.0522, lng=-118.2437)
+        search_local_artisans("locksmith", "Los Angeles, CA")
     )
     for res in results:
         print(res)
