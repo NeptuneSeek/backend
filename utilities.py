@@ -4,8 +4,11 @@ from typing import List, Dict, Tuple
 DAY_NAMES = ['Sun', 'Mon', 'Tue', 'Wed', 'Thu', 'Fri', 'Sat']
 
 def parse_hours_summary(opening_hours: List[Dict], gmt_offset: float) -> Tuple[str, bool]:
+    # print(opening_hours, gmt_offset)
     weekly_schedule = {i: [] for i in range(7)}
     for period in opening_hours:
+        if 'open' not in period or 'close' not in period:
+            continue
         open_day = period['open']['day']
         open_time = time(hour=period['open']['hour'], minute=period['open']['minute'])
         close_day = period['close']['day']
@@ -59,23 +62,5 @@ def parse_hours_summary(opening_hours: List[Dict], gmt_offset: float) -> Tuple[s
 
 
 
-opening_hours = [
-      {
-        "open": { "day": 1, "hour": 8, "minute": 0 },
-        "close": { "day": 1, "hour": 18, "minute": 0 }
-      },
-      {
-        "open": { "day": 2, "hour": 8, "minute": 0 },
-        "close": { "day": 2, "hour": 18, "minute": 0 }
-      },
-      {
-        "open": { "day": 3, "hour": 8, "minute": 0 },
-        "close": { "day": 3, "hour": 18, "minute": 0 }
-      },
-      {
-        "open": { "day": 5, "hour": 8, "minute": 0 },
-        "close": { "day": 5, "hour": 18, "minute": 0 }
-      }
-    ]
-
-print(parse_hours_summary(opening_hours, -8))
+# opening_hours = [{'open': {'day': 1, 'hour': 7, 'minute': 0}, 'close': {'day': 1, 'hour': 21, 'minute': 0}}, {'open': {'day': 2, 'hour': 7, 'minute': 0}, 'close': {'day': 2, 'hour': 21, 'minute': 0}}, {'open': {'day': 3, 'hour': 7, 'minute': 0}, 'close': {'day': 3, 'hour': 21, 'minute': 0}}, {'open': {'day': 4, 'hour': 7, 'minute': 0}, 'close': {'day': 4, 'hour': 21, 'minute': 0}}, {'open': {'day': 5, 'hour': 7, 'minute': 0}, 'close': {'day': 5, 'hour': 21, 'minute': 0}}, {'open': {'day': 6, 'hour': 10, 'minute': 0}, 'close': {'day': 6, 'hour': 14, 'minute': 0}}]
+# print(parse_hours_summary(opening_hours, -8))

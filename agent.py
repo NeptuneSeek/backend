@@ -68,17 +68,18 @@ async def search_classifier(query: str) -> tuple:
                     "role": "system",
                     "content": (
                         "You are a classifier that extracts the profession, service type, or artisan from a user's query and pairs it with the corresponding location.\n"
-                        "If the user does not specify a city and state, assume a reasonable or commonly associated location based on the profession or general U.S. context.\n"
+                        "If the user does not specify a city and state, assume a reasonable or commonly associated U.S. location based on the profession.\n"
                         "\n"
-                        "You must also generate:\n"
-                        "- A short, friendly reply message for the user.\n"
-                        "- A number (an integer, either randomly between 3–10 or inferred from the prompt).\n"
+                        "You must also:\n"
+                        "- Generate a short, friendly reply message for the user.\n"
+                        "- Determine the correct GMT offset (in whole hours, as an integer) based on the chosen city and state.\n"
                         "\n"
                         "Return your response as a **single string** in exactly the following format:\n"
-                        "profession_or_artisan<->City, State<->reply_text<->number\n"
+                        "profession_or_artisan<->City, State<->reply_text<->gmt_offset\n"
                         "\n"
                         "Do not include any extra text, line breaks, explanations, or punctuation outside this format."
                     )
+
                 },
                 {
                     "role": "user",
@@ -91,10 +92,10 @@ async def search_classifier(query: str) -> tuple:
         response = await client.post(ENDPOINT, headers=headers, json=payload)
         response.raise_for_status()
         result = response.json().get("choices")[0].get("message").get("content")
-        artisan, location, message, number = tuple(result.strip().split("<->"))
-        number = int(number.strip())
+        artisan, location, message, gmt_offset = tuple(result.strip().split("<->"))
+        gmt_offset = int(gmt_offset.strip())
         # print(artisan.strip(), location.strip(), message.strip(), number)
-        return artisan.strip(), location.strip(), message.strip(), number
+        return artisan.strip(), location.strip(), message.strip(), gmt_offset
 
 
 
