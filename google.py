@@ -3,8 +3,6 @@ from httpx import AsyncClient
 from settings import settings
 
 
-BASE_URL = "https://places.googleapis.com/v1"
-GEOCODE_URL = "https://maps.googleapis.com/maps/api/geocode/json"
 
 HEADERS = {
     "Content-Type": "application/json",
@@ -25,7 +23,7 @@ HEADERS = {
 async def geocode_location(location: str):
     params = {"address": location, "key": settings.GOOGLE_API_KEY}
     async with AsyncClient() as client:
-        response = await client.get(GEOCODE_URL, params=params)
+        response = await client.get(settings.GOOGLE_GEOCODE_URL, params=params)
         response.raise_for_status()
         data = response.json()
         if data["results"]:
@@ -33,8 +31,8 @@ async def geocode_location(location: str):
             return loc["lat"], loc["lng"]
         return None, None
 
-async def search_local_artisans(query: str, location: str = "", radius: int = 10000):
-    url = f"{BASE_URL}/places:searchText"
+async def google_local_artisans(query: str, location: str = "", radius: int = 10000):
+    url = f"{settings.GOOGLE_PLACE_URL}/places:searchText"
     lat, lng = await geocode_location(location)
     if lat is None or lng is None:
         raise ValueError("Could not geocode the provided location.")
@@ -76,12 +74,12 @@ async def search_local_artisans(query: str, location: str = "", radius: int = 10
 
 
 
-import asyncio
+# import asyncio
 
-if __name__ == "__main__":
-    results = asyncio.run(
-        search_local_artisans("locksmith", "Los Angeles, CA")
-    )
-    for res in results:
-        print(res)
-    print(len(results), "results found.")
+# if __name__ == "__main__":
+#     results = asyncio.run(
+#         google_local_artisans("dentist", "Los Angeles, CA")
+#     )
+#     for res in results:
+#         print(res)
+#     print(len(results), "results found.")

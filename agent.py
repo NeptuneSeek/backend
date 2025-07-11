@@ -97,26 +97,7 @@ async def search_classifier(query: str) -> tuple:
         return artisan.strip(), location.strip(), message.strip(), number
 
 
-async def search_and_format_artisans(query: str, retry: int = 0) -> dict:
-    from dummy import generate_dummy_businesses
-    try:
-        async with AsyncClient() as client:
-            artisan, location, message, number,  = await search_classifier(query)
-            data = generate_dummy_businesses(artisan, location, number)
-            return {
-                "message": message,
-                "results": data
-            }
-    except Exception as e:
-        print(f"Error during search_classifier [{retry+1}]: {e}")
-        if retry < 3:
-            retry += 1
-            return await search_and_format_artisans(query, retry)
-        else:
-            return {
-                "message": "Unable to retrieve artisan data after multiple attempts.",
-                "results": []
-            }
+
 
     
 
