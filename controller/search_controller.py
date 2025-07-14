@@ -1,7 +1,8 @@
 from urllib.parse import quote_plus
 from agent import search_classifier
 from settings import settings
-from utilities import parse_hours_summary
+from utilities.utils import parse_hours_summary
+from utilities.scoring import ratings_reviews_scoring, availability_scoring
 from typing import Tuple, Dict
 
 
@@ -56,23 +57,43 @@ async def fetch_neptune_artisans(artisan: str, location: str, gmt_offset: int, r
 def format_artisan_data(artisans: list, gmt_offset: float) -> list:
     formatted_data = []
     for artisan in artisans:
-        neptune_score, score_description, is_open, opening_hours_summary = neptune_scoring(artisan, gmt_offset)
-        formatted_data.append({
-            "name": artisan.get("name", "Unknown"),
-            "address": artisan.get("address", "No address provided"),
-            "review": f'{artisan.get("rating", 0.0)} ({artisan.get("rating_count", 0):,} reviews)',
-            "pricing": artisan.get("price_level", "Not available"),
-            "phone": artisan.get("phone", "No phone number"),
-            "booking": artisan.get("website", ""),
-            "business_status": artisan.get("business_status", "Unknown"),
-            "map": f"https://www.google.com/maps/search/?api=1&query={quote_plus(artisan.get('address', ''))}",
-            "opening_hours": opening_hours_summary,
-            "is_open": is_open,
-            "neptune_score": neptune_score,
-            "score_description": score_description
-            })
+        try:
+            neptune_score, score_description, is_open, opening_hours_summary = neptune_scoring(artisan, gmt_offset)
+            # print(neptune_score, score_description, is_open, opening_hours_summary)
+            business_status = artisan.get("business_status", "N/A")
+            if business_status != "OPERATIONAL":
+                continue
+
+            formatted_data.append({
+                "name": artisan.get("name", "N/A"),
+                "address": artisan.get("address", "N/A"),
+                "review": f'{artisan.get("rating", 0.0)} ({artisan.get("rating_count", 0):,} reviews)',
+                "pricing": artisan.get("price_level", "N/A"),
+                "phone": artisan.get("phone", "N/A"),
+                "booking": artisan.get("website", "N/A"),
+                "map": f"https://www.google.com/maps/search/?api=1&query={quote_plus(artisan.get('address', ''))}",
+                "opening_hours": opening_hours_summary,
+                "is_open": is_open,
+                "neptune_score": neptune_score,
+                "score_description": score_description
+                })
+        except Exception as e:
+            print(f"Error formatting artisan data: {e}")
     return formatted_data
 
 def neptune_scoring(artisan: dict, gmt_offset: int) -> Tuple[int, str, bool, str]:
-    opening_hours_summary, is_open = parse_hours_summary(opening_hours=artisan.get("opening_hours", []), gmt_offset=gmt_offset)
-    return int(29), "Scoring description", is_open, opening_hours_summary
+    opening_hours = artisan.get("opening_hours", [])
+    ratings = float(artisan.get("rating", 0.0))
+    reviews = int(artisan.get("rating_count", 0))
+
+    opening_hours_summary, is_open = parse_hours_summary(opening_hours=opening_hours, gmt_offset=gmt_offset)
+    ratings_reviews_score = ratings_reviews_scoring(ratings, reviews)
+    availability_score = availability_scoring(opening_hours, is_open)
+    score_description = (
+        f"This provider earns a Neptune score of {ratings_reviews_score + availability_score}, "
+        f"composed of: {ratings_reviews_score} points from a {ratings}-star rating, "
+        f"and {availability_score} points for availability."
+    )
+
+    neptune_score = ratings_reviews_score + availability_score
+    return neptune_score, score_description, is_open, opening_hours_summary

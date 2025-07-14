@@ -15,6 +15,7 @@ class Settings:
     GOOGLE_GEOCODE_URL: str = "https://maps.googleapis.com/maps/api/geocode/json"
 
     RETRY_ATTEMPTS: int = 3
+    AVILABILITY__MINUTES: int = 5 * 24 * 60
 
 
 

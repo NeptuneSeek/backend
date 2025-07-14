@@ -48,7 +48,7 @@ async def google_local_artisans(query: str, location: str = "", radius: int = 10
                 "radius": radius
             }
         },
-        "maxResultCount": 20
+        "maxResultCount": 50
     }
 
     async with AsyncClient() as client:
