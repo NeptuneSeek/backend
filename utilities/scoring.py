@@ -45,12 +45,51 @@ def availability_scoring(open_hours: list, is_open: bool) -> int:
             # Wraps to next week
             total_minutes += (settings.AVILABILITY__MINUTES - open_min) + close_min
 
-    # Cap at 10080 minutes (7*24*60)
     total_minutes = min(total_minutes, settings.AVILABILITY__MINUTES)
-    # print(f"Total open minutes in a week: {total_minutes:,} of 10,080")
     open_hours_score = round((total_minutes / settings.AVILABILITY__MINUTES) * 30)
     return score + open_hours_score
 
 
-# def pricing
+
+def pricing_scoring(price_level: int, average_price: float) -> int:
+    """
+    Calculate the pricing score based on price level and average price.
+    The score is out of 30 points.
+    """
+    if price_level < 0 or price_level > 4:
+        raise ValueError(f"[{price_level}] -> Price level must be between 0 and 4.")
+    if average_price < 0:
+        raise ValueError(f"[{average_price}] -> Average price cannot be negative.")
+
+    # 15 points for price level, 15 points for proximity to average price (within 20%)
+    # Cheaper price_level should get higher score (0 = cheapest, 4 = most expensive) + 1
+    price_level_score = round(((5 - price_level) / 4.0) * 15)
+    price_proximity_score = min(max(0, (average_price - 100) // 10), 15)
+    return price_level_score + price_proximity_score
+
+
+def price_range_from_price_level(price_level: int, currency_symbol: str, average_price: float) -> str:
+    """
+    Convert Google price level (1-4) to a price range string, dynamically using average_price.
+    """
+    if price_level < 0 or price_level > 4:
+        raise ValueError(f"[{price_level}] -> Price level must be between 0 and 4.")
+
+    # Define multipliers for each price level
+    multipliers = {
+        0: (0.22, 0.45),   # 22% - 45% of avg price
+        1: (0.5, 0.99),   # 50% - 99% of avg price
+        2: (1.0, 1.49),   # 100% - 149%
+        3: (1.5, 1.99),   # 150% - 199%
+        4: (2.0, None),   # 200% and above
+    }
+
+    low, high = multipliers[price_level]
+    if high is not None:
+        min_price = round(average_price * low)
+        max_price = round(average_price * high)
+        return f"{currency_symbol}{min_price} - {currency_symbol}{max_price}"
+    else:
+        min_price = round(average_price * low)
+        return f"{currency_symbol}{min_price}+"
     
