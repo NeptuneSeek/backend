@@ -56,7 +56,7 @@ def parse_hours_summary(opening_hours: List[Dict], gmt_offset: float) -> Tuple[s
         days_str = ', '.join(ranges)
         parts.append(f"{days_str}: {start_str} – {end_str}")
 
-    summary = "Open " + "; ".join(parts)
+    summary = "Open " + "; ".join(parts) if parts else "N/A"
     return summary, is_open
 
 

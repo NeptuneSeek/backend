@@ -79,7 +79,8 @@ def format_artisan_data(artisans: list, gmt_offset: float, currency_symbol: str,
                 })
         except Exception as e:
             print(f"Error formatting artisan data: {e}")
-    return formatted_data
+
+    return sorted(formatted_data, key=lambda x: x.get("neptune_score", None), reverse=True)
 
 
 
@@ -93,13 +94,16 @@ def neptune_scoring(artisan: dict, gmt_offset: int, average_price: float) -> Tup
     ratings_reviews_score = ratings_reviews_scoring(ratings, reviews)
     availability_score = availability_scoring(opening_hours, is_open)
     pricing_score = pricing_scoring(price_level, average_price)
+    
+    neptune_score = ratings_reviews_score + availability_score + pricing_score
+
     score_description = (
-        f"This provider earns a Neptune score of {ratings_reviews_score + availability_score}, "
-        f"composed of: {ratings_reviews_score} points from a {ratings}-star rating {reviews:,} reviews, "
-        f"and {availability_score} points for availability."
+        f"This provider earns a Neptune score of {neptune_score}, "
+        f"composed of: {ratings_reviews_score} points from a {ratings} star rating {reviews:,} reviews, "
+        f"{availability_score} points for availability, "
+        f"and {pricing_score} points for pricing."
     )
 
     # print(f"Avg Price ${average_price:,}| RR_Score: {ratings_reviews_score}, Availability Score: {availability_score}, Pricing Score: {pricing_score}")
 
-    neptune_score = ratings_reviews_score + availability_score + pricing_score
     return neptune_score, score_description, is_open, opening_hours_summary

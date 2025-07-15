@@ -63,7 +63,7 @@ async def google_local_artisans(query: str, location: str = "", radius: int = 10
             "name": place.get("displayName", {}).get("text"),
             "address": place.get("formattedAddress"),
             "rating": place.get("rating"),
-            "price_level": place.get("priceLevel", random.randint(0, 4)),  # Default to a random price level if not available
+            "price_level": place.get("priceLevel", random.randint(1, 2)),  # Default to a random price level if not available
             "phone": place.get("nationalPhoneNumber"),
             "business_status": place.get("businessStatus"),
             "opening_hours": place.get("regularOpeningHours", {}).get("periods", []),
