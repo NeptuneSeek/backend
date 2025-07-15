@@ -1,9 +1,6 @@
 import random
 from urllib.parse import quote_plus
 
-import random
-from urllib.parse import quote_plus
-
 def generate_dummy_business(profession: str, location: str):
     adjectives = ['Affordable', 'Reliable', 'Trusted', 'Expert', 'Quality']
     suffixes = ['Services', 'Solutions', 'Experts', 'Pros', 'Team']

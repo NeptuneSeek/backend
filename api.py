@@ -33,8 +33,8 @@ async def search(data: SearchModel):
     Handles search requests by forwarding the search query to the agent module
     and returning formatted artisan data in a JSON response.
     """
-    from agent import search_and_format_artisans
+    from controller.search_controller import fetch_neptune_rated_artisans
     return JSONResponse(
-        content=await search_and_format_artisans(data.search),
+        content=await fetch_neptune_rated_artisans(data.search),
         status_code=status.HTTP_200_OK
     )
