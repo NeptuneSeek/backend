@@ -16,6 +16,7 @@ HEADERS = {
         "places.nationalPhoneNumber,"
         "places.businessStatus,"
         "places.userRatingCount,"
+        "places.reviews,"
         "places.regularOpeningHours,"
         "places.websiteUri"
     )
@@ -68,8 +69,11 @@ async def google_local_artisans(query: str, location: str = "", radius: int = 10
             "business_status": place.get("businessStatus"),
             "opening_hours": place.get("regularOpeningHours", {}).get("periods", []),
             "rating_count": place.get("userRatingCount"),
+            "reviews": place.get("reviews", []),
             "website": place.get("websiteUri"),
         })
+
+        
 
     return results
 

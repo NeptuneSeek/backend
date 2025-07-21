@@ -88,7 +88,7 @@ def price_range_from_price_level(price_level: int, currency_symbol: str, average
     if high is not None:
         min_price = round(average_price * low)
         max_price = round(average_price * high)
-        return f"{currency_symbol}{min_price} - {currency_symbol}{max_price}"
+        return f"{currency_symbol}{min_price:,} - {currency_symbol}{max_price:,}"
     else:
         min_price = round(average_price * low)
         return f"{currency_symbol}{min_price}+"
